@@ -178,7 +178,8 @@ ggplot(nc) +
 ```{r}
 
 # Example usage of this function (using a South Carolina CRS)
-transform_and_plot(nc, new_crs = "EPSG:32133", title = "South Carolina" )
+transform_and_plot(nc, new_crs = "EPSG:32133", title = "South Carolina")
+transform_and_plot(nc, new_crs = "EPSG:6439", title = "Florida")
 ```
 
 **Verify your understanding:** If you had point location data that was not in the NAD27 CRS, what would you expect about the accuracy of how they would be overlaid on the original North Carolina map?
