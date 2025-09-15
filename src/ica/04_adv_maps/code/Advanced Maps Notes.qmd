@@ -156,23 +156,27 @@ Take a look at the **function** below that re-maps a spatial object using a new 
 - Use your function to make two new maps using your chosen CRSs.
 
 ```{r transform_via_function}
-transform_and_plot <- function(spatial_obj, new_crs, title = 'Chicago Map') {
+# Ths transform_and_plot is like a normal function in a any Programming Language 
+transform_and_plot <- function(spatial_obj, new_crs, title) {
     spatial_obj %>% 
         st_transform(crs = new_crs) %>% 
         ggplot() +
             geom_sf() +
-            theme_classic()
+            labs(title = title) +
+            theme_classic() 
   
 }
 
 # Example usage of this function (using a South Carolina CRS)
-transform_and_plot(nc, new_crs = "EPSG:32133")
+transform_and_plot(nc, new_crs = "EPSG:32133", title = "South Carolina" )
 
 
 
 ```
 
 **Verify your understanding:** If you had point location data that was not in the NAD27 CRS, what would you expect about the accuracy of how they would be overlaid on the original North Carolina map?
+
+It won't be as accurate because the point does not fit the NAD27 datum CRS and since NAD27 is for all of America and North Carolina is in US, the view would be distorted. 
 
 
 ## MN Map with Multiple Layers
@@ -201,9 +205,18 @@ names(mn_counties)[names_counties == "state_name"] <- c("state_name1", "state_na
 - If the datasets don't all have the same CRS, use `st_transform()` to update the datasets to have the same CRS as `mn_cities`. You can use `crs = st_crs(mn_cities)` within `st_transform()`.
 
 ```{r}
-
+st_crs(mn_cities)
+st_crs(mn_water)
+st_crs(mn_counties)
 
 ```
+
+```{r}
+mn_counties_trans <- mn_counties %>% 
+  st_transform(crs = st_crs(mn_cities))
+
+```
+
 
 
 ### Counties + Cities
@@ -215,6 +228,7 @@ names(mn_counties)[names_counties == "state_name"] <- c("state_name1", "state_na
 - Install the `ggthemes` package, and add the following layer to use a clean map theme: `+ ggthemes::theme_map()`
 
 ```{r}
+st_crs(mn_counties_trans)
 
 
 ```
@@ -226,13 +240,13 @@ names(mn_counties)[names_counties == "state_name"] <- c("state_name1", "state_na
 7. We can use traditional `ggplot2` aesthetics (e.g., `fill`, `color`) to display location specific attributes. Below we only plot large cities, and we color and size cities according to their population.
 
 ```{r mn_map_add_color}
-ggplot() +
-    geom_sf(data = mn_counties, fill = "white") + 
-    geom_sf(data = mn_cities |> filter(Population >= 10000), mapping = aes(color = Population, size = Population)) + # cities layer
-    scale_color_viridis_c() + # continuous (gradient) color scale
-    labs(title = "Minnesota Cities with Population >= 10,000") + 
-    ggthemes::theme_map() +
-    theme(legend.position = "bottom") # move legend
+# ggplot() +
+    # geom_sf(data = mn_counties, fill = "white") + 
+    # geom_sf(data = mn_cities |> filter(Population >= 10000), mapping = aes(color = Population, size = Population)) + # cities layer
+    # scale_color_viridis_c() + # continuous (gradient) color scale
+    # labs(title = "Minnesota Cities with Population >= 10,000") + 
+    # ggthemes::theme_map() +
+    # theme(legend.position = "bottom") # move legend
 ```
 
 Look up the `scale_color_viridis_c()` documentation via the [ggplot2 reference](https://ggplot2.tidyverse.org/reference/scale_viridis.html).
