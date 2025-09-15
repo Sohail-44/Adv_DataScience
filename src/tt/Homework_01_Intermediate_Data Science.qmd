@@ -14,7 +14,7 @@ library(tidyverse)
 ```
 
 
-# Reading in Data 
+##Reading in Data 
 ```{r}
 # .. go up one directory
 # Reading in Data 
@@ -23,7 +23,7 @@ view(daily_AccApril_22)
 ```
 
 
-## Mutating day 
+##Mutating day 
 
 ```{r}
 # Note to myself : %>% this piping can be used only if you have installed deplyr or itdyverse 
@@ -86,7 +86,7 @@ weekdays_fatalities <-daily_AccApril_22 %>%
 weekdays_fatalities
 
 ```
-## ggploting weekday vs weekedn
+## ggploting weekday vs weekend
 ```{r}
 # Cool, it shows that means fatalities is highest on Saturday,friday and sunday -- Lets plot mean fatalities of whole week and take mean of sunday, saturday and friday fatalities and compare with Monday, tuesday, Wednesday and thurday fatalities 
 

@@ -102,9 +102,11 @@ See [Spatial Data Appendix](https://hash-mac.github.io/stat212site-f25/notes/spa
 # The sf package comes with a North Carolina shapefile:
 nc <- st_read(system.file("shape/nc.shp", package = "sf"))
 
+
+
 # Read in shapefiles just downloaded
-mn_cities <- st_read("../Data/Lakes_and_Rivers_Open_Water_Features/LakesAndRivers.shp")
-mn_water <- st_read("../Data/Minnesota_Population_Centers/city_and_township_population_centers.shp")
+mn_cities <- st_read("../Data/Minnesota_Population_Centers/city_and_township_population_centers.shp")
+mn_water <- st_read("../Data/Lakes_and_Rivers_Open_Water_Features/LakesAndRivers.shp")
 ```
 
 The `sf` package reads in spatial data in `data.frame`-like format. Using the `class()` function we can check the **class** (type) of object that we just read in. Note the presence of the "sf" and "data.frame" classes:
@@ -167,11 +169,16 @@ transform_and_plot <- function(spatial_obj, new_crs, title) {
   
 }
 
+ggplot(nc) +
+    geom_sf() +
+    theme_classic() +
+    labs(title = "NAD27 (Original)") # Just givin g the title 
+
+```
+```{r}
+
 # Example usage of this function (using a South Carolina CRS)
 transform_and_plot(nc, new_crs = "EPSG:32133", title = "South Carolina" )
-
-
-
 ```
 
 **Verify your understanding:** If you had point location data that was not in the NAD27 CRS, what would you expect about the accuracy of how they would be overlaid on the original North Carolina map?
@@ -206,14 +213,22 @@ names(mn_counties)[names_counties == "state_name"] <- c("state_name1", "state_na
 
 ```{r}
 st_crs(mn_cities)
+```
+```{r}
 st_crs(mn_water)
-st_crs(mn_counties)
 
 ```
 
 ```{r}
-mn_counties_trans <- mn_counties %>% 
+st_crs(mn_counties) # mn_counties CRS is different  EPSG:4326 
+```
+
+
+```{r}
+mn_counties <- mn_counties %>% 
   st_transform(crs = st_crs(mn_cities))
+
+st_crs(mn_counties)
 
 ```
 
@@ -228,7 +243,11 @@ mn_counties_trans <- mn_counties %>%
 - Install the `ggthemes` package, and add the following layer to use a clean map theme: `+ ggthemes::theme_map()`
 
 ```{r}
-st_crs(mn_counties_trans)
+library(ggthemes) 
+ggplot() + # plot frame
+    geom_sf(data = mn_counties, fill = "white") + # county boundary layer
+    geom_sf(data = mn_cities, size = 0.5) + # city point layer
+    ggthemes::theme_map() # removes x and y 
 
 
 ```
@@ -240,13 +259,13 @@ st_crs(mn_counties_trans)
 7. We can use traditional `ggplot2` aesthetics (e.g., `fill`, `color`) to display location specific attributes. Below we only plot large cities, and we color and size cities according to their population.
 
 ```{r mn_map_add_color}
-# ggplot() +
-    # geom_sf(data = mn_counties, fill = "white") + 
-    # geom_sf(data = mn_cities |> filter(Population >= 10000), mapping = aes(color = Population, size = Population)) + # cities layer
-    # scale_color_viridis_c() + # continuous (gradient) color scale
-    # labs(title = "Minnesota Cities with Population >= 10,000") + 
-    # ggthemes::theme_map() +
-    # theme(legend.position = "bottom") # move legend
+ggplot() +
+    geom_sf(data = mn_counties, fill = "white") + 
+    geom_sf(data = mn_cities |> filter(Population >= 10000), mapping = aes(color = Population, size = Population)) + # cities layer
+     scale_color_viridis_c() + # continuous (gradient) color scale
+    labs(title = "Minnesota Cities with Population >= 10,000") + 
+    ggthemes::theme_map() +
+    theme(legend.position = "bottom") # move legend
 ```
 
 Look up the `scale_color_viridis_c()` documentation via the [ggplot2 reference](https://ggplot2.tidyverse.org/reference/scale_viridis.html).
@@ -282,6 +301,15 @@ Build on our existing map by adding a raster layer for elevation as the backgrou
 - Add in the layers from the map above to show the largest cities and the county outlines. To remove a background color, use `fill = NA`.
 
 ```{r}
+ggplot() +
+    geom_raster(data = elev_df, aes(x = x, y = y, fill = elevation)) + # adding the elevation as first (bottom) layer
+    scale_fill_gradient(low = "darkgreen", high = "white", guide = FALSE) +
+    geom_sf(data = mn_counties, fill = NA, color = "black") + 
+    geom_sf(data = mn_cities |> filter(Population >= 10000), mapping = aes(color = Population, size = Population))+ # cities layer
+    scale_color_viridis_c() + # continuous (gradient) color scale
+    labs(title = "Minnesota Cities with Population >= 10,000") + 
+    ggthemes::theme_map() +
+    theme(legend.position = "bottom") # move legend
 
 
 ```
@@ -328,9 +356,9 @@ ggplot() +
 Let's add to the above code chunk to save the map above to an image file called `tc_map_zoom.png` in the `figures` folder. The code example below shows a general template for saving a plot to file. Choose a reasonable width and height. (There are also `jpeg()` and `pdf()` functions for writing images.)
 
 ```{r save_plot_example, eval=FALSE}
-png("relative path to image", width = width_in_pixels, height = height_in_pixels)
+# png("relative path to image", width = width_in_pixels, height = height_in_pixels)
 # Code for creating plot
-dev.off()
+# dev.off()
 ```
 
 
